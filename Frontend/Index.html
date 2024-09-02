@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Search API Test Frontend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        textarea, input, select {
+            width: 100%;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 10px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Hybrid Search API Testing</h2>
+
+    <!-- Form to send request to Flask /vectorise endpoint -->
+    <h3>Vectorize Content</h3>
+    <textarea id="vectorContent" placeholder="Enter content to vectorize"></textarea><br>
+    <button onclick="vectoriseContent()">Send to /vectorise</button>
+
+    <h4>Response:</h4>
+    <pre id="vectoriseResult"></pre>
+
+    <!-- Form to send request to Node.js /search endpoint -->
+    <h3>Keyword Search</h3>
+    <input type="text" id="keywordQuery" placeholder="Search Query"><br>
+    <select id="keywordField">
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+        <option value="category">Category</option>
+        <option value="content">Content</option>
+    </select><br>
+    <button onclick="performKeywordSearch()">Send to /search</button>
+
+    <h4>Response:</h4>
+    <pre id="keywordSearchResult"></pre>
+
+    <!-- Form to send request to Node.js /hybrid-search endpoint -->
+    <h3>Hybrid Search</h3>
+    <input type="text" id="hybridQuery" placeholder="Search Query"><br>
+    <select id="hybridField">
+        <option value="title">Title</option>
+        <option value="author">Author</option>
+        <option value="category">Category</option>
+        <option value="content">Content</option>
+    </select><br>
+    <button onclick="performHybridSearch()">Send to /hybrid-search</button>
+
+    <h4>Response:</h4>
+    <pre id="hybridSearchResult"></pre>
+
+</div>
+
+<script>
+    const FLASK_URL = 'http://localhost:5001';
+    const NODE_URL = 'http://localhost:5000';
+
+    // Function to call Flask /vectorise endpoint for vectorization
+    function vectoriseContent() {
+        const content = document.getElementById('vectorContent').value;
+        
+        fetch(`${FLASK_URL}/vectorise`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: [content] })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('vectoriseResult').innerText = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('vectoriseResult').innerText = `Error: ${error}`;
+        });
+    }
+
+    // Function to call Node.js /search endpoint for keyword search
+    function performKeywordSearch() {
+        const query = document.getElementById('keywordQuery').value;
+        const field = document.getElementById('keywordField').value;
+        
+        fetch(`${NODE_URL}/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query, field })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('keywordSearchResult').innerText = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('keywordSearchResult').innerText = `Error: ${error}`;
+        });
+    }
+
+    // Function to call Node.js /hybrid-search endpoint for hybrid search
+    function performHybridSearch() {
+        const query = document.getElementById('hybridQuery').value;
+        const field = document.getElementById('hybridField').value;
+        
+        fetch(`${NODE_URL}/hybrid-search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query, field })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('hybridSearchResult').innerText = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('hybridSearchResult').innerText = `Error: ${error}`;
+        });
+    }
+</script>
+
+</body>
+</html>
